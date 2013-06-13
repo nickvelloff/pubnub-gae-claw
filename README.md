@@ -13,15 +13,15 @@ www.pubnub.com - PubNub Web Data Push Service in the Cloud.
 http://github.com/pubnub/pubnub-api/tree/master/python
 
 ## Keys (these are all demo sandboxed so just get your own)
-Key 1 (secret channel for claw)
-Subscribe Key	sub-c-0b405dba-ce3f-11e2-9936-02ee2ddab7fe
-Publish Key	pub-c-904b6a5c-c9be-4a95-ba3a-cff409a070ad
-Secret Key	sec-c-MDg0NmE0ZmMtNmE2ZC00NTFmLWI0MmQtMjE4NDkyNmM2NGZi
+Key 1 (secret channel for claw)  
+Subscribe Key	sub-c-0b405dba-ce3f-11e2-9936-02ee2ddab7fe  
+Publish Key	pub-c-904b6a5c-c9be-4a95-ba3a-cff409a070ad  
+Secret Key	sec-c-MDg0NmE0ZmMtNmE2ZC00NTFmLWI0MmQtMjE4NDkyNmM2NGZi  
 
-Key 2
-Subscribe Key	sub-c-aa5aac0c-d3c6-11e2-84c1-02ee2ddab7fe
-Publish Key	pub-c-193b98ef-12c1-4657-9332-8884802c4c7d
-Secret Key	sec-c-ZDE5YzczNzQtNGUyNy00NmQzLTkzYjMtZDljODZkOTFjYmJl
+Key 2  
+Subscribe Key	sub-c-aa5aac0c-d3c6-11e2-84c1-02ee2ddab7fe  
+Publish Key	pub-c-193b98ef-12c1-4657-9332-8884802c4c7d  
+Secret Key	sec-c-ZDE5YzczNzQtNGUyNy00NmQzLTkzYjMtZDljODZkOTFjYmJl  
 
 ### Working claw flow:
 	- detect network connection, launch infinitely running python script
