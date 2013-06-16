@@ -10,6 +10,23 @@
 ## -----------------------------------
 
 from Pubnub import Pubnub
+
+## THIS BIT ALLOWS US TO USE "urlfetch" from GAE while running from 
+## Not needed in runtime 
+from google.appengine.api import apiproxy_stub_map
+from google.appengine.api import urlfetch_stub
+
+# Create a stub map so we can build App Engine mock stubs.
+apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
+
+# Register App Engine mock stubs.
+apiproxy_stub_map.apiproxy.RegisterStub(
+    'urlfetch', urlfetch_stub.URLFetchServiceStub())
+## -------------------------------------------------------------
+
+
+
+
 import sys
 
 publish_key   = len(sys.argv) > 1 and sys.argv[1] or 'demo'
@@ -23,7 +40,7 @@ ssl_on        = len(sys.argv) > 4 and bool(sys.argv[4]) or False
 ## -----------------------------------------------------------------------
 
 pubnub = Pubnub( publish_key, subscribe_key, secret_key, ssl_on )
-crazy  = ' ~`!@#$%^&*(顶顅Ȓ)+=[]\\{}|;\':"./<>?abcd'
+crazy  = ' ~`!@#$%^&*(顶顅Ȓ)+=[]\\{}|;\':",./<>?abcd'
 
 ## ---------------------------------------------------------------------------
 ## Unit Test Function
@@ -46,6 +63,15 @@ test( pubish_success[0] == 1, 'Publish First Message Success' )
 ## -----------------------------------------------------------------------
 ## History Example
 ## -----------------------------------------------------------------------
+history = pubnub.history({
+    'channel' : crazy,
+    'limit'   : 1
+})
+test(
+    history[0].encode('utf-8') == crazy,
+    'History Message: ' + history[0]
+)
+test( len(history) == 1, 'History Message Count' )
 
 ## -----------------------------------------------------------------------
 ## PubNub Server Time Example

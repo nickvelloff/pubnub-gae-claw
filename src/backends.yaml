@@ -1,0 +1,5 @@
+backends:
+- name: commlisteners
+  start: backends.PubnubBackendInit.app
+  class: B1
+  #options: dynamic
