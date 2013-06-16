@@ -12,7 +12,7 @@ PubNub 3.3 Web Data Push Cloud-hosted API - PYTHON
 www.pubnub.com - PubNub Web Data Push Service in the Cloud. 
 http://github.com/pubnub/pubnub-api/tree/master/python
 
-## Keys (these are all demo sandboxed so just get your own)
+## Keys (temp sandbox keys)
 Key 1 (secret channel for claw)  
 Subscribe Key	sub-c-0b405dba-ce3f-11e2-9936-02ee2ddab7fe  
 Publish Key	pub-c-904b6a5c-c9be-4a95-ba3a-cff409a070ad  
