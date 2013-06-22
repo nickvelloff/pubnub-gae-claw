@@ -11,7 +11,7 @@ import logging
 class PubnubChannelFactory():
     
     logging.info('PubnubChannelFactory()')
-        
+
     def __init__(self, 
                  publish_key, 
                  subscribe_key, 
@@ -68,7 +68,7 @@ class PubnubChannelFactory():
         self.t = background_thread.BackgroundThread(target=self.__doSubscribe, kwargs=args)
         self.t.daemon = True
         self.t.start()
-
+        
         # Type 2
 #         self.tid = background_thread.start_new_background_thread(target=self.__doSubscribe, kwargs=args)
         
@@ -78,13 +78,15 @@ class PubnubChannelFactory():
                                      kwargs['secret_key'], 
                                      kwargs['ssl_on']
                                      )
-        if len(self.__channelName) > 0:
-            logging.debug('subscribing to channel ({})'.format(kwargs['channel']))
+        
+        if len( kwargs['channel'] ) > 0:
+            logging.info('subscribing to channel ({})'.format(kwargs['channel']))
         
             self.pubnubConnecor.subscribe({
                 'channel'  : kwargs['channel'],
                 'callback' : kwargs['callback']
-        })
+                })
+            
         else:
             logging.info('no channel defined, listening will not begin until one is assigned via switchChannel')
             return False
@@ -95,7 +97,6 @@ class PubnubChannelFactory():
      
     def __receiveComm(self, message):
         self.__callbackMethod(message)
-        ##logging.debug(message)
         return True
     
     '''

@@ -5,6 +5,12 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /requestClawAccess
+  script: rest.RequestClawAccess.app
+
+#- url: /be
+#  script: backends.RuntimeBackendInit.app
+
 - url: /.*
   script: main.app
   

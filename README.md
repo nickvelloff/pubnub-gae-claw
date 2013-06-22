@@ -1,11 +1,6 @@
-# Claw Google App Engine Python Application
-
-This app is the central business and application logic layer for the claw.
+# Client, Server, Claw app flows
 
 The general purpose of this app is to:
-
-* Manage client connections and queuing
-* Manage claw channels and overall controller
 
 The project uses the [Pubnub Python library](https://github.com/pubnub/pubnub-api/tree/master/python/)
 PubNub 3.3 Web Data Push Cloud-hosted API - PYTHON
@@ -13,54 +8,73 @@ www.pubnub.com - PubNub Web Data Push Service in the Cloud.
 http://github.com/pubnub/pubnub-api/tree/master/python
 
 ## Keys (TEMP sandbox keys)
-Keys 1 (secret channel for claw)  
-Subscribe Key	sub-c-0b405dba-ce3f-11e2-9936-02ee2ddab7fe  
-Publish Key	pub-c-904b6a5c-c9be-4a95-ba3a-cff409a070ad  
-Secret Key	sec-c-MDg0NmE0ZmMtNmE2ZC00NTFmLWI0MmQtMjE4NDkyNmM2NGZi  
+Key 1 (secret channel for claw)  
+Subscribe Key		sub-c-0b405dba-ce3f-11e2-9936-02ee2ddab7fe  
+Publish Key			pub-c-904b6a5c-c9be-4a95-ba3a-cff409a070ad  
+Secret Key			sec-c-MDg0NmE0ZmMtNmE2ZC00NTFmLWI0MmQtMjE4NDkyNmM2NGZi  
 
-Keys 2 (public "ClawComm" for clients to get in the queue)
-Subscribe Key	sub-c-aa5aac0c-d3c6-11e2-84c1-02ee2ddab7fe  
-Publish Key	pub-c-193b98ef-12c1-4657-9332-8884802c4c7d  
-Secret Key	sec-c-ZDE5YzczNzQtNGUyNy00NmQzLTkzYjMtZDljODZkOTFjYmJl
+Key 2 (public UNIQUE_CHANNELs for clients to get in the queue)
+Subscribe Key		sub-c-aa5aac0c-d3c6-11e2-84c1-02ee2ddab7fe  
+Publish Key			pub-c-193b98ef-12c1-4657-9332-8884802c4c7d  
+Secret Key			sec-c-ZDE5YzczNzQtNGUyNy00NmQzLTkzYjMtZDljODZkOTFjYmJl
 
-Note: Will need one more set of keys for direct client to TEMP claw channel comm 
+## General Notes
+	- Claw is a "dumb client", and is instructed what channel to listen to over secure connection to App (GAE)
+	- Claw maintains persistent connection to secure app channel, sub/pub
+	- Claw when ready to be controlled will switch and listen to temp channel that is user controlled
+	- App assigns clients unique channel IDs so they can be identified individually
+	- Apps general purpose is to manage client connections and queuing
 
-### GAE App flow (needs to be over SSL):
-	App to claw communication
-	- launch GAE "Backends" long running process, use dynamic
-	- init ("ClawComm" channel) to Key 1 (secret channel for claw) for direct comm b/t gae app and claw app - Publish, Subscribe (2 way comm)
-	- secret channel for claw uses Secret key to sign messages - use SSL on
-	- ClawComm will communicate claw status
-		- ready, inprocess (TBD)
-	- app will assign the claw "presence id" and monitor connection status (join, leave, reconnect)
-			
-	App to client communication
-	- subscribe ("ClientComm" channel) to Key 2 (open channel for client) for client live queuing - Subscribe only (1 way comm)
-		- until queuing system is in place, every new client will be granted access to claw and kick anyone else off (channel reset)
-		- this channel is only used to request access to the claw, and will ultimately give clients their queue position
-		- when claw is ready to receive a new client, app send message over ClawComm and assigns a new channel id
-			- app maintains channel names, unique to requesting client to ensure only one client can connect to claw
-			- 
-		- when 
-	- 
+## General technical client flow
+	- Client request unique channel from API - UNIQUE_CHANNEL, returns queue location (0...n), shows user
+	- Client registers to UNIQUE_CHANNEL channel on key set 2, subscribe, publish (two way)
+	- Client waits for 0 then messages "get ready your up"
+	- Client receives message when claw is listening to their UNIQUE_CHANNEL {'control':true}
+	
+	- Client sends controlling instructions:
+		{'command':'upOn'}, {'command':'upOff'}, {'command':'rightOn'}, {'command':'rightOff'} ...
+	- Client receives "end" command {'control':false} and disconnects from channel "unsubscribe"
+	
+## General technical server flow
 
-
-### Working claw flow:
-	- detect network connection, launch infinitely running python script
-	- subscribe ("ClawComm" channel) to Key 1 (secret channel for claw) for direct comm b/t gae app and claw app - Publish, Subscribe (2 way comm)
-	- claw client app is essentially a "dumb client", and is completely controlled by the GAE App
-	- claw only offers status messages over ClawComm to GAE App
-	- claw will receive message over ClawComm to
-		- disconnect from current "temporary client channel" (if connected) 
-		- connect to new "temporary client channel" with supplied name
-		- listen for commands to control claw
-		- probably auto select "insert quarter"
-		- message client over "temporary client channel" to begin controlling
-		- before disconnect, message client over "temporary client channel" to resign control - wont matter either way because claw will stop listening 
+	### App startup (or restart)
+		- App loads any existing clients with UNIQUE_CHANNELs from db (class ClawUser)
+		- App sets up pubnub instance to publish on key set 2
+		- App publishes update to all clients on all UNIQUE_CHANNEL channels, noting their position in the queue "updateClients()"
 		
-	- claw will auto disconnect from "temporary client channel" when claw rests in ending state
-
-### Claw Client flow:
-	- 
-	- 
-
+		
+		- App registers to "ClawComm" channel on key set 1, subscribe, publish (two way)
+			Only App and Claw apps have pub/sub keys to channel set 1 so it is secure
+		- App registers to presence on "ClawComm" channel, begins listening to connects/disconnects
+		- App receives "claw status" and sets internal state
+		
+	### Upon "claw status" update from claw over "ClawComm"
+		- Claw states:
+			CLAW_READY - indicates claw is ready to receive a new user
+				If available, gets oldest queued client and removes from queue list
+					If client is no longer present channel is removed and move to next queued client
+				Publishes to claw the UNIQUE_CHANNEL to listen to for client direct control of claw
+				Publishes unique channel id to claw over "ClawComm" channel
+				updateClients() - to alert them of their position in the queue
+				
+			CLAW_CONTROLLED - indicates client is being controlled by a client
+			CLAW_OFFLINE - probably detected by presence on ClawComm channel
+	
+	### Upon detection of client connect/disconnect
+		- App adds/removes user to in memory client list
+		- updateClients()		
+			
+## General technical claw flow	
+	
+	### Claw startup
+		- Claw registers to "ClawComm" channel on key set 1, subscribe, publish (two way)
+		- Claw sends CLAW_READY over "ClawComm"
+		- Claw listens for CHANNEL_LISTEN request over secure channel
+		
+	### Claw receives CHANNEL_LISTEN request containing UNIQUE_CHANNEL
+		- Claw sends CLAW_CONTROLLED
+		- Claw registers to UNIQUE_CHANNEL channel on key set 2, subscribe, publish (two way)
+		
+	### Claw completes control cycle - enters resting/complete state
+		- Claw will auto disconnect from UNIQUE_CHANNEL (if connected)
+		- Claw sends CLAW_READY over "ClawComm"

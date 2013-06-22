@@ -113,8 +113,8 @@ class Pubnub():
             '0',
             message
         ]) or [ 0, "Not Sent", "0" ]
-
-
+        
+    
     def subscribe( self, args ) :
         """
         #**
@@ -159,6 +159,8 @@ class Pubnub():
 
             timetoken = 'timetoken' in args and args['timetoken'] or 0
             try :
+#                 print('HOW OFTEN DO I FIRE?');
+                
                 ## Wait for Message
                 response = self._request(self._encode([
                     'subscribe',
