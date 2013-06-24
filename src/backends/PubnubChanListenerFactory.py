@@ -8,7 +8,7 @@ from Pubnub import Pubnub
 from google.appengine.api import background_thread
 import logging
 
-class PubnubChannelFactory():
+class PubnubChanListenerFactory():
     
     logging.info('PubnubChannelFactory()')
 

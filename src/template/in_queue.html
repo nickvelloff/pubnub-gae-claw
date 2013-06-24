@@ -1,0 +1,58 @@
+<!DOCTYPE script PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+<script src="/js/pubnub.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+	(function(){
+    // ----------------------------------
+    // INIT PUBNUB
+    // ----------------------------------
+    var pubnub = PUBNUB({
+        publish_key   : '{{pub}}',
+        subscribe_key : '{{sub}}',
+        ssl           : {{ssl}},
+        origin        : 'pubsub.pubnub.com'
+    });
+	
+	alert( '{{pub}}' )
+	
+    // ----------------------------------
+    // LISTEN FOR MESSAGES
+    // ----------------------------------
+    pubnub.subscribe({
+        restore  : true,
+        connect  : send_hello,
+        channel  : 'my_channel',
+        callback : function(message) {
+            console.log(JSON.stringify(message));
+        },
+        disconnect : function() {
+            console.log("Connection Lost");
+        }
+    });
+
+    // ----------------------------------
+    // SEND MESSAGE
+    // ----------------------------------
+    function send_hello() {
+        pubnub.publish({
+            channel  : 'my_channel',
+            message  : { example : "Hello World!" },
+            callback : function(info) {
+                console.log(JSON.stringify(info));
+            }
+        });
+    }
+})();
+
+</script>
+
+</head>
+<body>
+	<input type="button" onclick="send_hello()" value="SomeValue" />
+</body>
+</html>
+
+

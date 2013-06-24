@@ -5,6 +5,8 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /js
+  static_dir: js
 - url: /requestClawAccess
   script: rest.RequestClawAccess.app
 
@@ -16,4 +18,8 @@ handlers:
   
 libraries:
 - name: webapp2
+  version: latest
+- name: jinja2                                                                  
+  version: latest                                                               
+- name: markupsafe                                                              
   version: latest
